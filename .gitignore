@@ -1,0 +1,8 @@
+.venv
+.idea
+spider/notebooks/config
+
+spider/spider_data/database/
+spider/spider_data/dev_database/
+bird/postgresql/init/
+bird/mini_dev/llm/data/dev_databases/

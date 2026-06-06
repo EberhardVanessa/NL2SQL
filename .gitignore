@@ -3,6 +3,6 @@
 spider/notebooks/config
 
 spider/spider_data/database/
-spider/spider_data/dev_database/
+spider/spider_data/test_database/
 bird/postgresql/init/
 bird/mini_dev/llm/data/dev_databases/

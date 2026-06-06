@@ -1,0 +1,26 @@
+services:
+  sqlite-setup:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spider-sqlite-setup
+    working_dir: /workspace
+    volumes:
+      - ./spider_data:/workspace/spider_data
+    environment:
+      DATABASE_ROOT: /workspace/spider_data/database
+    command: sh /usr/local/bin/setup-spider-dbs.sh
+
+  sqlite-shell:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spider-sqlite-shell
+    working_dir: /workspace
+    volumes:
+      - ./spider_data:/workspace/spider_data
+    environment:
+      DATABASE_ROOT: /workspace/spider_data/database
+    command: sh
+    stdin_open: true
+    tty: true

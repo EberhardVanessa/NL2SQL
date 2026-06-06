@@ -1,0 +1,2 @@
+curl http://localhost:8081/files
+$ curl -X POST http://localhost:8081/files/upload   -F "files=@schema.txt"

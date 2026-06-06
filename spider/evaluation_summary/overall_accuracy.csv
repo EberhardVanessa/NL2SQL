@@ -1,0 +1,3 @@
+mode,correct,evaluated,accuracy,accuracy_percent
+thinking,731,1034,0.706963249516441,70.70%
+non_thinking,620,1034,0.5996131528046421,59.96%

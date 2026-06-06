@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: bird-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: BIRD
+      POSTGRES_USER: bird
+      POSTGRES_PASSWORD: birdpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - bird_pg_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+
+volumes:
+  bird_pg_data:

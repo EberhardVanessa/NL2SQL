@@ -1,0 +1,8 @@
+source_file,rows,thinking_evaluated,thinking_correct,thinking_accuracy,non_thinking_evaluated,non_thinking_correct,non_thinking_accuracy,thinking_accuracy_percent,non_thinking_accuracy_percent
+spider_test_with_ask_responses_offset_0_max_rows_100.json,100,100,68,0.68,100,62,0.62,68.00%,62.00%
+spider_test_with_ask_responses_offset_100_max_rows_200.json,200,200,127,0.635,200,118,0.59,63.50%,59.00%
+spider_test_with_ask_responses_offset_300_max_rows_100.json,100,100,89,0.89,100,60,0.6,89.00%,60.00%
+spider_test_with_ask_responses_offset_400_max_rows_100.json,100,100,64,0.64,100,56,0.56,64.00%,56.00%
+spider_test_with_ask_responses_offset_500_max_rows_100.json,100,100,70,0.7,100,58,0.58,70.00%,58.00%
+spider_test_with_ask_responses_offset_600_max_rows_200.json,200,200,135,0.675,200,99,0.495,67.50%,49.50%
+spider_test_with_ask_responses_offset_800_max_rows_234.json,234,234,178,0.7606837606837606,234,167,0.7136752136752137,76.07%,71.37%

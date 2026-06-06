@@ -1,0 +1,988 @@
+[
+  {
+    "db_id":"department_management",
+    "query":"SELECT count(*) FROM head WHERE age  >  56",
+    "question":"How many heads of the departments are older than 56 ?",
+    "query_toks":[
+      "SELECT",
+      "count",
+      "(",
+      "*",
+      ")",
+      "FROM",
+      "head",
+      "WHERE",
+      "age",
+      ">",
+      "56"
+    ],
+    "query_toks_no_value":[
+      "select",
+      "count",
+      "(",
+      "*",
+      ")",
+      "from",
+      "head",
+      "where",
+      "age",
+      ">",
+      "value"
+    ],
+    "question_toks":[
+      "How",
+      "many",
+      "heads",
+      "of",
+      "the",
+      "departments",
+      "are",
+      "older",
+      "than",
+      "56",
+      "?"
+    ],
+    "ask_response_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"How many heads of the departments are older than 56 ?",
+        "is_thinking":true,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"SELECT COUNT(T1.head_id) FROM management AS T1 INNER JOIN head AS T2 ON T1.head_id = T2.head_id WHERE T2.age > 56",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"SELECT COUNT(T1.head_id) FROM management AS T1 INNER JOIN head AS T2 ON T1.head_id = T2.head_id WHERE T2.age > 56",
+      "ask_reached_end":true
+    },
+    "ask_response_non_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"How many heads of the departments are older than 56 ?",
+        "is_thinking":false,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"```sqlite\nSELECT\n  COUNT(T1.head_id)\nFROM head AS T1\nINNER JOIN management AS T2\n  ON T1.head_id = T2.head_id\nWHERE\n  T1.age > 56;\n```",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"```sqlite\nSELECT\n  COUNT(T1.head_id)\nFROM head AS T1\nINNER JOIN management AS T2\n  ON T1.head_id = T2.head_id\nWHERE\n  T1.age > 56;\n```",
+      "ask_reached_end":true
+    }
+  },
+  {
+    "db_id":"department_management",
+    "query":"SELECT name ,  born_state ,  age FROM head ORDER BY age",
+    "question":"List the name, born state and age of the heads of departments ordered by age.",
+    "query_toks":[
+      "SELECT",
+      "name",
+      ",",
+      "born_state",
+      ",",
+      "age",
+      "FROM",
+      "head",
+      "ORDER",
+      "BY",
+      "age"
+    ],
+    "query_toks_no_value":[
+      "select",
+      "name",
+      ",",
+      "born_state",
+      ",",
+      "age",
+      "from",
+      "head",
+      "order",
+      "by",
+      "age"
+    ],
+    "question_toks":[
+      "List",
+      "the",
+      "name",
+      ",",
+      "born",
+      "state",
+      "and",
+      "age",
+      "of",
+      "the",
+      "heads",
+      "of",
+      "departments",
+      "ordered",
+      "by",
+      "age",
+      "."
+    ],
+    "ask_response_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"List the name, born state and age of the heads of departments ordered by age.",
+        "is_thinking":true,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"SELECT T1.name, T1.born_state, T1.age FROM head AS T1 INNER JOIN management AS T2 ON T1.head_id = T2.head_id ORDER BY T1.age ASC",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"SELECT T1.name, T1.born_state, T1.age FROM head AS T1 INNER JOIN management AS T2 ON T1.head_id = T2.head_id ORDER BY T1.age ASC",
+      "ask_reached_end":true
+    },
+    "ask_response_non_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"List the name, born state and age of the heads of departments ordered by age.",
+        "is_thinking":false,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"```sqlite\nSELECT\n  T1.name,\n  T1.born_state,\n  T1.age\nFROM head AS T1\nINNER JOIN management AS T2\n  ON T1.head_id = T2.head_id\nORDER BY\n  T1.age;\n```",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"```sqlite\nSELECT\n  T1.name,\n  T1.born_state,\n  T1.age\nFROM head AS T1\nINNER JOIN management AS T2\n  ON T1.head_id = T2.head_id\nORDER BY\n  T1.age;\n```",
+      "ask_reached_end":true
+    }
+  },
+  {
+    "db_id":"department_management",
+    "query":"SELECT creation ,  name ,  budget_in_billions FROM department",
+    "question":"List the creation year, name and budget of each department.",
+    "query_toks":[
+      "SELECT",
+      "creation",
+      ",",
+      "name",
+      ",",
+      "budget_in_billions",
+      "FROM",
+      "department"
+    ],
+    "query_toks_no_value":[
+      "select",
+      "creation",
+      ",",
+      "name",
+      ",",
+      "budget_in_billions",
+      "from",
+      "department"
+    ],
+    "question_toks":[
+      "List",
+      "the",
+      "creation",
+      "year",
+      ",",
+      "name",
+      "and",
+      "budget",
+      "of",
+      "each",
+      "department",
+      "."
+    ],
+    "ask_response_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"List the creation year, name and budget of each department.",
+        "is_thinking":true,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"SELECT STRFTIME('%Y', creation) AS creation_year, name, budget_in_billions FROM department",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"SELECT STRFTIME('%Y', creation) AS creation_year, name, budget_in_billions FROM department",
+      "ask_reached_end":true
+    },
+    "ask_response_non_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"List the creation year, name and budget of each department.",
+        "is_thinking":false,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"SELECT creation, name, budget_in_billions FROM department;",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"SELECT creation, name, budget_in_billions FROM department;",
+      "ask_reached_end":true
+    }
+  },
+  {
+    "db_id":"department_management",
+    "query":"SELECT max(budget_in_billions) ,  min(budget_in_billions) FROM department",
+    "question":"What are the maximum and minimum budget of the departments?",
+    "query_toks":[
+      "SELECT",
+      "max",
+      "(",
+      "budget_in_billions",
+      ")",
+      ",",
+      "min",
+      "(",
+      "budget_in_billions",
+      ")",
+      "FROM",
+      "department"
+    ],
+    "query_toks_no_value":[
+      "select",
+      "max",
+      "(",
+      "budget_in_billions",
+      ")",
+      ",",
+      "min",
+      "(",
+      "budget_in_billions",
+      ")",
+      "from",
+      "department"
+    ],
+    "question_toks":[
+      "What",
+      "are",
+      "the",
+      "maximum",
+      "and",
+      "minimum",
+      "budget",
+      "of",
+      "the",
+      "departments",
+      "?"
+    ],
+    "ask_response_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"What are the maximum and minimum budget of the departments?",
+        "is_thinking":true,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"SELECT MAX(budget_in_billions) AS max_budget, MIN(budget_in_billions) AS min_budget FROM department",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"SELECT MAX(budget_in_billions) AS max_budget, MIN(budget_in_billions) AS min_budget FROM department",
+      "ask_reached_end":true
+    },
+    "ask_response_non_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"What are the maximum and minimum budget of the departments?",
+        "is_thinking":false,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"To find the maximum and minimum budget of the departments, you can query the `department` table.\n\n```sql\nSELECT\n  MAX(budget_in_billions),\n  MIN(budget_in_billions)\nFROM department;\n```",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"To find the maximum and minimum budget of the departments, you can query the `department` table.\n\n```sql\nSELECT\n  MAX(budget_in_billions),\n  MIN(budget_in_billions)\nFROM department;\n```",
+      "ask_reached_end":true
+    }
+  },
+  {
+    "db_id":"department_management",
+    "query":"SELECT avg(num_employees) FROM department WHERE ranking BETWEEN 10 AND 15",
+    "question":"What is the average number of employees of the departments whose rank is between 10 and 15?",
+    "query_toks":[
+      "SELECT",
+      "avg",
+      "(",
+      "num_employees",
+      ")",
+      "FROM",
+      "department",
+      "WHERE",
+      "ranking",
+      "BETWEEN",
+      "10",
+      "AND",
+      "15"
+    ],
+    "query_toks_no_value":[
+      "select",
+      "avg",
+      "(",
+      "num_employees",
+      ")",
+      "from",
+      "department",
+      "where",
+      "ranking",
+      "between",
+      "value",
+      "and",
+      "value"
+    ],
+    "question_toks":[
+      "What",
+      "is",
+      "the",
+      "average",
+      "number",
+      "of",
+      "employees",
+      "of",
+      "the",
+      "departments",
+      "whose",
+      "rank",
+      "is",
+      "between",
+      "10",
+      "and",
+      "15",
+      "?"
+    ],
+    "ask_response_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"What is the average number of employees of the departments whose rank is between 10 and 15?",
+        "is_thinking":true,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"SELECT AVG(num_employees) FROM department WHERE ranking >= 10 AND ranking <= 15",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"SELECT AVG(num_employees) FROM department WHERE ranking >= 10 AND ranking <= 15",
+      "ask_reached_end":true
+    },
+    "ask_response_non_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"What is the average number of employees of the departments whose rank is between 10 and 15?",
+        "is_thinking":false,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"```sql\nSELECT AVG(num_employees)\nFROM department\nWHERE ranking BETWEEN 10 AND 15;\n```",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"```sql\nSELECT AVG(num_employees)\nFROM department\nWHERE ranking BETWEEN 10 AND 15;\n```",
+      "ask_reached_end":true
+    }
+  },
+  {
+    "db_id":"department_management",
+    "query":"SELECT name FROM head WHERE born_state != 'California'",
+    "question":"What are the names of the heads who are born outside the California state?",
+    "query_toks":[
+      "SELECT",
+      "name",
+      "FROM",
+      "head",
+      "WHERE",
+      "born_state",
+      "!",
+      "=",
+      "'California",
+      "'"
+    ],
+    "query_toks_no_value":[
+      "select",
+      "name",
+      "from",
+      "head",
+      "where",
+      "born_state",
+      "!",
+      "=",
+      "value"
+    ],
+    "question_toks":[
+      "What",
+      "are",
+      "the",
+      "names",
+      "of",
+      "the",
+      "heads",
+      "who",
+      "are",
+      "born",
+      "outside",
+      "the",
+      "California",
+      "state",
+      "?"
+    ],
+    "ask_response_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"What are the names of the heads who are born outside the California state?",
+        "is_thinking":true,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"SELECT name FROM head WHERE born_state != 'California'",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"SELECT name FROM head WHERE born_state != 'California'",
+      "ask_reached_end":true
+    },
+    "ask_response_non_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"What are the names of the heads who are born outside the California state?",
+        "is_thinking":false,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"SELECT name FROM head WHERE born_state != 'California';",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"SELECT name FROM head WHERE born_state != 'California';",
+      "ask_reached_end":true
+    }
+  },
+  {
+    "db_id":"department_management",
+    "query":"SELECT DISTINCT T1.creation FROM department AS T1 JOIN management AS T2 ON T1.department_id  =  T2.department_id JOIN head AS T3 ON T2.head_id  =  T3.head_id WHERE T3.born_state  =  'Alabama'",
+    "question":"What are the distinct creation years of the departments managed by a secretary born in state 'Alabama'?",
+    "query_toks":[
+      "SELECT",
+      "DISTINCT",
+      "T1.creation",
+      "FROM",
+      "department",
+      "AS",
+      "T1",
+      "JOIN",
+      "management",
+      "AS",
+      "T2",
+      "ON",
+      "T1.department_id",
+      "=",
+      "T2.department_id",
+      "JOIN",
+      "head",
+      "AS",
+      "T3",
+      "ON",
+      "T2.head_id",
+      "=",
+      "T3.head_id",
+      "WHERE",
+      "T3.born_state",
+      "=",
+      "'Alabama",
+      "'"
+    ],
+    "query_toks_no_value":[
+      "select",
+      "distinct",
+      "t1",
+      ".",
+      "creation",
+      "from",
+      "department",
+      "as",
+      "t1",
+      "join",
+      "management",
+      "as",
+      "t2",
+      "on",
+      "t1",
+      ".",
+      "department_id",
+      "=",
+      "t2",
+      ".",
+      "department_id",
+      "join",
+      "head",
+      "as",
+      "t3",
+      "on",
+      "t2",
+      ".",
+      "head_id",
+      "=",
+      "t3",
+      ".",
+      "head_id",
+      "where",
+      "t3",
+      ".",
+      "born_state",
+      "=",
+      "value"
+    ],
+    "question_toks":[
+      "What",
+      "are",
+      "the",
+      "distinct",
+      "creation",
+      "years",
+      "of",
+      "the",
+      "departments",
+      "managed",
+      "by",
+      "a",
+      "secretary",
+      "born",
+      "in",
+      "state",
+      "'Alabama",
+      "'",
+      "?"
+    ],
+    "ask_response_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"What are the distinct creation years of the departments managed by a secretary born in state 'Alabama'?",
+        "is_thinking":true,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"SELECT DISTINCT T1.creation FROM department AS T1 INNER JOIN management AS T2 ON T1.department_id = T2.department_id INNER JOIN head AS T3 ON T2.head_id = T3.head_id WHERE T3.born_state = 'Alabama'",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"SELECT DISTINCT T1.creation FROM department AS T1 INNER JOIN management AS T2 ON T1.department_id = T2.department_id INNER JOIN head AS T3 ON T2.head_id = T3.head_id WHERE T3.born_state = 'Alabama'",
+      "ask_reached_end":true
+    },
+    "ask_response_non_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"What are the distinct creation years of the departments managed by a secretary born in state 'Alabama'?",
+        "is_thinking":false,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"```sqlite\nSELECT DISTINCT\n  T1.creation\nFROM department AS T1\nINNER JOIN management AS T2\n  ON T1.department_id = T2.department_id\nINNER JOIN head AS T3\n  ON T2.head_id = T3.head_id\nWHERE\n  T3.born_state = 'Alabama';\n```",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"```sqlite\nSELECT DISTINCT\n  T1.creation\nFROM department AS T1\nINNER JOIN management AS T2\n  ON T1.department_id = T2.department_id\nINNER JOIN head AS T3\n  ON T2.head_id = T3.head_id\nWHERE\n  T3.born_state = 'Alabama';\n```",
+      "ask_reached_end":true
+    }
+  },
+  {
+    "db_id":"department_management",
+    "query":"SELECT born_state FROM head GROUP BY born_state HAVING count(*)  >=  3",
+    "question":"What are the names of the states where at least 3 heads were born?",
+    "query_toks":[
+      "SELECT",
+      "born_state",
+      "FROM",
+      "head",
+      "GROUP",
+      "BY",
+      "born_state",
+      "HAVING",
+      "count",
+      "(",
+      "*",
+      ")",
+      ">",
+      "=",
+      "3"
+    ],
+    "query_toks_no_value":[
+      "select",
+      "born_state",
+      "from",
+      "head",
+      "group",
+      "by",
+      "born_state",
+      "having",
+      "count",
+      "(",
+      "*",
+      ")",
+      ">",
+      "=",
+      "value"
+    ],
+    "question_toks":[
+      "What",
+      "are",
+      "the",
+      "names",
+      "of",
+      "the",
+      "states",
+      "where",
+      "at",
+      "least",
+      "3",
+      "heads",
+      "were",
+      "born",
+      "?"
+    ],
+    "ask_response_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"What are the names of the states where at least 3 heads were born?",
+        "is_thinking":true,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"SELECT born_state FROM head GROUP BY born_state HAVING COUNT(born_state) >= 3",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"SELECT born_state FROM head GROUP BY born_state HAVING COUNT(born_state) >= 3",
+      "ask_reached_end":true
+    },
+    "ask_response_non_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"What are the names of the states where at least 3 heads were born?",
+        "is_thinking":false,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"```sqlite\nSELECT born_state\nFROM head\nGROUP BY born_state\nHAVING COUNT(head_id) >= 3;\n```",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"```sqlite\nSELECT born_state\nFROM head\nGROUP BY born_state\nHAVING COUNT(head_id) >= 3;\n```",
+      "ask_reached_end":true
+    }
+  },
+  {
+    "db_id":"department_management",
+    "query":"SELECT creation FROM department GROUP BY creation ORDER BY count(*) DESC LIMIT 1",
+    "question":"In which year were most departments established?",
+    "query_toks":[
+      "SELECT",
+      "creation",
+      "FROM",
+      "department",
+      "GROUP",
+      "BY",
+      "creation",
+      "ORDER",
+      "BY",
+      "count",
+      "(",
+      "*",
+      ")",
+      "DESC",
+      "LIMIT",
+      "1"
+    ],
+    "query_toks_no_value":[
+      "select",
+      "creation",
+      "from",
+      "department",
+      "group",
+      "by",
+      "creation",
+      "order",
+      "by",
+      "count",
+      "(",
+      "*",
+      ")",
+      "desc",
+      "limit",
+      "value"
+    ],
+    "question_toks":[
+      "In",
+      "which",
+      "year",
+      "were",
+      "most",
+      "departments",
+      "established",
+      "?"
+    ],
+    "ask_response_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"In which year were most departments established?",
+        "is_thinking":true,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"SELECT department.creation FROM department GROUP BY department.creation ORDER BY count(*) DESC LIMIT 1",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"SELECT department.creation FROM department GROUP BY department.creation ORDER BY count(*) DESC LIMIT 1",
+      "ask_reached_end":true
+    },
+    "ask_response_non_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"In which year were most departments established?",
+        "is_thinking":false,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"To find the year in which most departments were established, you would need to query the `department` table and group by the year extracted from the `creation` column, then count the departments for each year to find the maximum.",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"To find the year in which most departments were established, you would need to query the `department` table and group by the year extracted from the `creation` column, then count the departments for each year to find the maximum.",
+      "ask_reached_end":true
+    }
+  },
+  {
+    "db_id":"department_management",
+    "query":"SELECT T1.name ,  T1.num_employees FROM department AS T1 JOIN management AS T2 ON T1.department_id  =  T2.department_id WHERE T2.temporary_acting  =  'Yes'",
+    "question":"Show the name and number of employees for the departments managed by heads whose temporary acting value is 'Yes'?",
+    "query_toks":[
+      "SELECT",
+      "T1.name",
+      ",",
+      "T1.num_employees",
+      "FROM",
+      "department",
+      "AS",
+      "T1",
+      "JOIN",
+      "management",
+      "AS",
+      "T2",
+      "ON",
+      "T1.department_id",
+      "=",
+      "T2.department_id",
+      "WHERE",
+      "T2.temporary_acting",
+      "=",
+      "'Yes",
+      "'"
+    ],
+    "query_toks_no_value":[
+      "select",
+      "t1",
+      ".",
+      "name",
+      ",",
+      "t1",
+      ".",
+      "num_employees",
+      "from",
+      "department",
+      "as",
+      "t1",
+      "join",
+      "management",
+      "as",
+      "t2",
+      "on",
+      "t1",
+      ".",
+      "department_id",
+      "=",
+      "t2",
+      ".",
+      "department_id",
+      "where",
+      "t2",
+      ".",
+      "temporary_acting",
+      "=",
+      "value"
+    ],
+    "question_toks":[
+      "Show",
+      "the",
+      "name",
+      "and",
+      "number",
+      "of",
+      "employees",
+      "for",
+      "the",
+      "departments",
+      "managed",
+      "by",
+      "heads",
+      "whose",
+      "temporary",
+      "acting",
+      "value",
+      "is",
+      "'Yes",
+      "'",
+      "?"
+    ],
+    "ask_response_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"Show the name and number of employees for the departments managed by heads whose temporary acting value is 'Yes'?",
+        "is_thinking":true,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"SELECT T1.name, T1.num_employees FROM department AS T1 INNER JOIN management AS T2 ON T1.department_id = T2.department_id WHERE T2.temporary_acting = 'Yes'",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"SELECT T1.name, T1.num_employees FROM department AS T1 INNER JOIN management AS T2 ON T1.department_id = T2.department_id WHERE T2.temporary_acting = 'Yes'",
+      "ask_reached_end":true
+    },
+    "ask_response_non_thinking":{
+      "request_payload":{
+        "user_id":"user_123",
+        "model":"google\/gemma-4-E4B-it",
+        "first_user_message":"I want to ask a question about my database schema.",
+        "question":"Show the name and number of employees for the departments managed by heads whose temporary acting value is 'Yes'?",
+        "is_thinking":false,
+        "skip_user_interaction":true,
+        "schema_name":"department_management"
+      },
+      "http_status_code":200,
+      "request_error":null,
+      "response_json":{
+        "status":"ok",
+        "answer":"```sqlite\nSELECT\n  T1.name,\n  T1.num_employees\nFROM department AS T1\nINNER JOIN management AS T2\n  ON T1.department_id = T2.department_id\nWHERE\n  T2.temporary_acting = 'Yes';\n```",
+        "reached_end":true
+      },
+      "ask_status":"ok",
+      "ask_answer":"```sqlite\nSELECT\n  T1.name,\n  T1.num_employees\nFROM department AS T1\nINNER JOIN management AS T2\n  ON T1.department_id = T2.department_id\nWHERE\n  T2.temporary_acting = 'Yes';\n```",
+      "ask_reached_end":true
+    }
+  }
+]

@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  schema-agent:
+    build: .
+    container_name: schema-agent
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      OPENAI_BASE_URL: "http://host.docker.internal:11434/v1"
+      OPENAI_API_KEY: "ollama"
+      MODEL_NAME: "llama3.2:3b"
+      DATA_DIR: "/data"
+      UPLOAD_DIR: "/data/uploads"
+      REGISTRY_PATH: "/data/file_registry.json"
+      LLM_PROVIDER: "local"
+      LLM_REST_URL: "http://host.docker.internal:8000/generate"
+      LLM_MAX_NEW_TOKENS: "2000"
+      PGHOST: "host.docker.internal"
+      PGPORT: "5432"
+      PGDATABASE: "BIRD"
+      PGUSER: "bird"
+      PGPASSWORD: "birdpass"
+    volumes:
+      - schema-agent-data:/data
+
+volumes:
+  schema-agent-data:

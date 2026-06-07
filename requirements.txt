@@ -11,5 +11,6 @@ aiosqlite==0.21.0
 psycopg2~=2.9.11
 sqlglot~=30.4.3
 openai~=1.109.1
+requests~=2.32.3
 tqdm~=4.67.3
 PyMySQL~=1.1.2

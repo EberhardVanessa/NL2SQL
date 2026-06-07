@@ -1,0 +1,202 @@
+-- Sample Webshop Database Schema
+-- Compatible with PostgreSQL-style SQL
+--
+-- NOTE FOR HITL / REVIEW:
+-- This schema intentionally includes a small amount of ambiguity in a few places
+-- so that a human reviewer should confirm the intended business rules before production use.
+-- Search for "HITL REVIEW" comments below.
+
+DROP TABLE IF EXISTS reviews CASCADE;
+DROP TABLE IF EXISTS shipments CASCADE;
+DROP TABLE IF EXISTS payments CASCADE;
+DROP TABLE IF EXISTS order_items CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS categories CASCADE;
+DROP TABLE IF EXISTS addresses CASCADE;
+DROP TABLE IF EXISTS customers CASCADE;
+
+CREATE TABLE customers (
+    customer_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    phone VARCHAR(50),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE addresses (
+    address_id SERIAL PRIMARY KEY,
+    customer_id INT NOT NULL,
+    street VARCHAR(255) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    postal_code VARCHAR(30) NOT NULL,
+    country VARCHAR(100) NOT NULL,
+    address_type VARCHAR(20) NOT NULL,
+
+    -- HITL REVIEW: A customer can have multiple shipping and billing addresses.
+    -- The schema does not identify which address is the default one.
+    -- A reviewer should decide whether a default address flag is needed.
+
+    CONSTRAINT fk_addresses_customer
+        FOREIGN KEY (customer_id)
+        REFERENCES customers(customer_id)
+        ON DELETE CASCADE,
+    CONSTRAINT chk_address_type
+        CHECK (address_type IN ('shipping', 'billing'))
+);
+
+CREATE TABLE categories (
+    category_id SERIAL PRIMARY KEY,
+    category_name VARCHAR(150) NOT NULL UNIQUE,
+    description TEXT
+);
+
+CREATE TABLE products (
+    product_id SERIAL PRIMARY KEY,
+    category_id INT NOT NULL,
+    product_name VARCHAR(200) NOT NULL,
+    description TEXT,
+    price DECIMAL(10, 2) NOT NULL,
+    stock_quantity INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- HITL REVIEW: The price column stores the current catalog price.
+    -- It is not clear whether tax is included or excluded.
+
+    CONSTRAINT fk_products_category
+        FOREIGN KEY (category_id)
+        REFERENCES categories(category_id)
+        ON DELETE RESTRICT,
+    CONSTRAINT chk_product_price
+        CHECK (price >= 0),
+    CONSTRAINT chk_stock_quantity
+        CHECK (stock_quantity >= 0)
+);
+
+CREATE TABLE orders (
+    order_id SERIAL PRIMARY KEY,
+    customer_id INT NOT NULL,
+    order_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(30) NOT NULL DEFAULT 'pending',
+    total_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
+
+    -- HITL REVIEW: total_amount may either be stored as a snapshot value
+    -- or calculated from order_items. Confirm which behavior is intended.
+
+    CONSTRAINT fk_orders_customer
+        FOREIGN KEY (customer_id)
+        REFERENCES customers(customer_id)
+        ON DELETE RESTRICT,
+    CONSTRAINT chk_order_status
+        CHECK (status IN ('pending', 'paid', 'shipped', 'delivered', 'cancelled', 'refunded')),
+    CONSTRAINT chk_total_amount
+        CHECK (total_amount >= 0)
+);
+
+CREATE TABLE order_items (
+    order_item_id SERIAL PRIMARY KEY,
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL,
+    unit_price DECIMAL(10, 2) NOT NULL,
+
+    -- HITL REVIEW: unit_price is intended to be the product price at checkout,
+    -- but it is not specified whether it includes discounts or tax.
+
+    CONSTRAINT fk_order_items_order
+        FOREIGN KEY (order_id)
+        REFERENCES orders(order_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_order_items_product
+        FOREIGN KEY (product_id)
+        REFERENCES products(product_id)
+        ON DELETE RESTRICT,
+    CONSTRAINT chk_order_item_quantity
+        CHECK (quantity > 0),
+    CONSTRAINT chk_order_item_unit_price
+        CHECK (unit_price >= 0),
+    CONSTRAINT uq_order_product
+        UNIQUE (order_id, product_id)
+);
+
+CREATE TABLE payments (
+    payment_id SERIAL PRIMARY KEY,
+    order_id INT NOT NULL UNIQUE,
+    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    payment_method VARCHAR(50) NOT NULL,
+    payment_status VARCHAR(30) NOT NULL DEFAULT 'pending',
+    amount DECIMAL(10, 2) NOT NULL,
+
+    -- HITL REVIEW: This table assumes one payment per order.
+    -- Confirm whether split payments, partial refunds, or multiple attempts are required.
+
+    CONSTRAINT fk_payments_order
+        FOREIGN KEY (order_id)
+        REFERENCES orders(order_id)
+        ON DELETE CASCADE,
+    CONSTRAINT chk_payment_method
+        CHECK (payment_method IN ('credit_card', 'paypal', 'bank_transfer', 'invoice')),
+    CONSTRAINT chk_payment_status
+        CHECK (payment_status IN ('pending', 'paid', 'failed', 'refunded')),
+    CONSTRAINT chk_payment_amount
+        CHECK (amount >= 0)
+);
+
+CREATE TABLE shipments (
+    shipment_id SERIAL PRIMARY KEY,
+    order_id INT NOT NULL UNIQUE,
+    shipping_address_id INT NOT NULL,
+    shipment_date TIMESTAMP,
+    delivery_date TIMESTAMP,
+    tracking_number VARCHAR(100) UNIQUE,
+    shipping_status VARCHAR(30) NOT NULL DEFAULT 'processing',
+
+    -- HITL REVIEW: This table assumes one shipment per order.
+    -- Confirm whether an order can be split into multiple shipments.
+
+    CONSTRAINT fk_shipments_order
+        FOREIGN KEY (order_id)
+        REFERENCES orders(order_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_shipments_address
+        FOREIGN KEY (shipping_address_id)
+        REFERENCES addresses(address_id)
+        ON DELETE RESTRICT,
+    CONSTRAINT chk_shipping_status
+        CHECK (shipping_status IN ('processing', 'shipped', 'delivered', 'returned'))
+);
+
+CREATE TABLE reviews (
+    review_id SERIAL PRIMARY KEY,
+    customer_id INT NOT NULL,
+    product_id INT NOT NULL,
+    rating INT NOT NULL,
+    comment TEXT,
+    review_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- HITL REVIEW: Customers can leave only one review per product.
+    -- Confirm whether customers should be allowed to update reviews after repeat purchases.
+
+    CONSTRAINT fk_reviews_customer
+        FOREIGN KEY (customer_id)
+        REFERENCES customers(customer_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_reviews_product
+        FOREIGN KEY (product_id)
+        REFERENCES products(product_id)
+        ON DELETE CASCADE,
+    CONSTRAINT chk_review_rating
+        CHECK (rating BETWEEN 1 AND 5),
+    CONSTRAINT uq_customer_product_review
+        UNIQUE (customer_id, product_id)
+);
+
+-- Helpful indexes for common webshop queries
+CREATE INDEX idx_orders_customer_id ON orders(customer_id);
+CREATE INDEX idx_orders_order_date ON orders(order_date);
+CREATE INDEX idx_products_category_id ON products(category_id);
+CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX idx_order_items_product_id ON order_items(product_id);
+CREATE INDEX idx_reviews_product_id ON reviews(product_id);
+CREATE INDEX idx_addresses_customer_id ON addresses(customer_id);

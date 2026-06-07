@@ -17,7 +17,7 @@ Do not invent tables, columns, or relations.
 
 
 CHECK_SCHEMA_CLARIFICATION_PROMPT = """
-You are checking whether the schema extraction is sufficient.
+You are checking whether the schema extraction is correct and whether it hides any unconfirmed user-intent assumption.
 
 User question:
 {question}
@@ -34,10 +34,17 @@ User clarification so far:
 Return JSON exactly like this:
 {{
   "needs_clarification": true or false,
-  "follow_up_question": "question for the user if needed, otherwise empty string"
+  "follow_up_question": "question for the user if needed, otherwise empty string",
+  "reason": "short reason for the decision"
 }}
 
-Ask for clarification only if the extracted schema is insufficient, ambiguous, or cannot safely support the next step.
+Decision rules:
+- Check whether the extracted schema is sufficient for the user's question.
+- Check whether the extraction omitted schema information needed for another plausible interpretation of the question.
+- Ask for clarification if the user request contains vague business meaning, ambiguous entities, undefined metrics, implicit date ranges, or ranking words whose definition is not confirmed by the user.
+- Ask for clarification if multiple valid SQL interpretations could answer the question differently while still using the schema correctly.
+- Do not treat an internally consistent extraction as enough if it selected one plausible interpretation without user confirmation.
+- Do not ask for clarification if the user's wording and previous clarifications already define the intended interpretation.
 """.strip()
 
 
@@ -71,7 +78,7 @@ Do not invent anything.
 
 
 CHECK_TABLES_COLUMNS_CLARIFICATION_PROMPT = """
-You are checking whether the selected tables and columns are sufficient.
+You are checking whether the selected tables and columns are correct and whether they hide any unconfirmed user-intent assumption.
 
 User question:
 {question}
@@ -91,10 +98,17 @@ User clarification so far:
 Return JSON exactly like this:
 {{
   "needs_clarification": true or false,
-  "follow_up_question": "question for the user if needed, otherwise empty string"
+  "follow_up_question": "question for the user if needed, otherwise empty string",
+  "reason": "short reason for the decision"
 }}
 
-Ask for clarification only if table or column selection is ambiguous or unsafe.
+Decision rules:
+- Check whether the selected tables and columns are supported by the extracted schema and match the user's question.
+- Check whether another plausible table or column choice would answer the same wording differently.
+- Ask for clarification if the selected tables or columns depend on an unstated meaning of a business term, metric, status, entity, time period, ranking, or relationship.
+- Ask for clarification if multiple valid SQL interpretations could answer the question differently while still using the schema correctly.
+- Do not treat an internally consistent table/column selection as enough if it selected one plausible interpretation without user confirmation.
+- Do not ask for clarification if the user's wording and previous clarifications already define the intended interpretation.
 """.strip()
 
 
@@ -137,7 +151,7 @@ Only use columns supported by the schema.
 
 
 CHECK_WHERE_CONDITIONS_CLARIFICATION_PROMPT = """
-You are checking whether the WHERE conditions are sufficient.
+You are checking whether the WHERE conditions are correct and whether they hide any unconfirmed user-intent assumption.
 
 User question:
 {question}
@@ -157,10 +171,17 @@ User clarification so far:
 Return JSON exactly like this:
 {{
   "needs_clarification": true or false,
-  "follow_up_question": "question for the user if needed, otherwise empty string"
+  "follow_up_question": "question for the user if needed, otherwise empty string",
+  "reason": "short reason for the decision"
 }}
 
-Ask for clarification only if filters, date ranges, entities, or requested constraints are ambiguous.
+Decision rules:
+- Check whether the filters are supported by the selected tables and columns and match the user's question.
+- Check whether required filters are missing, unnecessary filters were added, or the filter values/operators are not justified by the user wording.
+- Ask for clarification if a filter depends on an unstated meaning of a business term, metric, status, date range, entity, segment, or requested constraint.
+- Ask for clarification if multiple valid SQL interpretations could answer the question differently while still using the schema correctly.
+- Do not treat internally consistent filters as enough if they selected one plausible interpretation without user confirmation.
+- Do not ask for clarification if the user's wording and previous clarifications already define the intended interpretation.
 """.strip()
 
 
@@ -213,7 +234,7 @@ Do not invent joins, columns, aliases, or relationships.
 
 
 CHECK_LIMIT_AGGREGATION_CLARIFICATION_PROMPT = """
-You are checking whether LIMIT, aggregation, grouping, and ordering are sufficient.
+You are checking whether LIMIT, aggregation, grouping, and ordering are correct and whether they hide any unconfirmed user-intent assumption.
 
 User question:
 {question}
@@ -236,10 +257,17 @@ User clarification so far:
 Return JSON exactly like this:
 {{
   "needs_clarification": true or false,
-  "follow_up_question": "question for the user if needed, otherwise empty string"
+  "follow_up_question": "question for the user if needed, otherwise empty string",
+  "reason": "short reason for the decision"
 }}
 
-Ask for clarification only if aggregation, grouping, sorting, ranking, or limits are ambiguous.
+Decision rules:
+- Check whether aggregation, grouping, sorting, ranking, and LIMIT are supported by the schema artifacts and match the user's question.
+- Check whether the plan chose one metric, ranking definition, grouping level, tie-breaking rule, or limit that the user did not specify.
+- Ask for clarification if the user's wording could reasonably mean different metrics or rankings, such as quantity, amount, count, revenue, average, latest, highest, best, most, top, active, popular, or similar business concepts.
+- Ask for clarification if multiple valid SQL interpretations could answer the question differently while still using the schema correctly.
+- Do not treat an internally consistent aggregation plan as enough if it selected one plausible interpretation without user confirmation.
+- Do not ask for clarification if the user's wording and previous clarifications already define the intended interpretation.
 """.strip()
 
 

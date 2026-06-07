@@ -130,7 +130,6 @@ class Pipe:
             "ALTER",
             "DROP",
             "EXPLAIN",
-            "QUERY_NOT_SAFE",
         )
         return upper.startswith(sql_prefixes)
 

@@ -2,6 +2,7 @@ from app.graph.agent_state import AgentState
 from langgraph.types import interrupt
 
 import json
+import logging
 import re
 from typing import Any
 
@@ -12,6 +13,9 @@ from app.graph.sql_validation import (
 )
 from app.graph.thinking import thinking_prompts
 from app.llm.utils import build_llm
+
+logger = logging.getLogger(__name__)
+MAX_CHECK_LOG_CHARS = 4000
 
 def route_after_step_for_optional_check(state: AgentState) -> str:
     if state.get("skip_user_interaction", False):
@@ -82,9 +86,41 @@ def build_clarification_block(state: AgentState) -> str:
     lines.append("")
     return "\n".join(lines)
 
+def strip_json_markdown_fence(content: str) -> str:
+    text = (content or "").strip()
+    match = re.fullmatch(
+        r"```(?:json)?\s*(.*?)\s*```",
+        text,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+    if match:
+        return match.group(1).strip()
+
+    return text
+
+def parse_json_value(content: str) -> Any:
+    text = strip_json_markdown_fence(content)
+
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+
+    object_start = text.find("{")
+    object_end = text.rfind("}")
+    if object_start != -1 and object_end > object_start:
+        return json.loads(text[object_start : object_end + 1])
+
+    array_start = text.find("[")
+    array_end = text.rfind("]")
+    if array_start != -1 and array_end > array_start:
+        return json.loads(text[array_start : array_end + 1])
+
+    raise json.JSONDecodeError("No JSON object or array found", text, 0)
+
 def parse_json_artifact(content: str, artifact_name: str) -> dict[str, Any]:
     try:
-        data = json.loads(content)
+        data = parse_json_value(content)
     except Exception as exc:
         return {
             "parse_error": str(exc),
@@ -103,6 +139,90 @@ def format_artifact(value: Any) -> str:
         return json.dumps(value, indent=2, ensure_ascii=False)
 
     return str(value)
+
+def truncate_for_log(value: Any, max_chars: int = MAX_CHECK_LOG_CHARS) -> str:
+    text = format_artifact(value)
+    if len(text) <= max_chars:
+        return text
+
+    return f"{text[:max_chars]}... [truncated {len(text) - max_chars} chars]"
+
+def fallback_follow_up_question(content: str) -> str:
+    raw = " ".join((content or "").strip().split())
+    if not raw:
+        return "Please clarify your request before I generate SQL."
+
+    question_match = re.search(r"([^.!?]*\?)", raw)
+    if question_match:
+        question = question_match.group(1).strip().strip('"')
+        return f"Please clarify: {question}"
+
+    before_reason = re.split(r'"\s*,\s*"reason"\s*:', raw, maxsplit=1)[0]
+    before_reason = before_reason.strip().strip('`"{}, ')
+    if before_reason:
+        return f"Please clarify: {before_reason}"
+
+    return "Please clarify your request before I generate SQL."
+
+def parse_clarification_response(content: str, check_name: str) -> dict[str, Any]:
+    try:
+        data = parse_json_value(content)
+    except Exception as exc:
+        logger.warning(
+            "HITL check %s returned invalid JSON: %s | failing safe to clarification | raw_response=%s",
+            check_name,
+            exc,
+            truncate_for_log(content),
+        )
+        return {
+            "needs_clarification": True,
+            "follow_up_question": fallback_follow_up_question(content),
+            "reason": "Clarification check returned invalid JSON.",
+            "parse_error": str(exc),
+        }
+
+    if not isinstance(data, dict):
+        logger.warning(
+            "HITL check %s returned non-object JSON; failing safe to clarification: %s",
+            check_name,
+            truncate_for_log(data),
+        )
+        return {
+            "needs_clarification": True,
+            "follow_up_question": "Please clarify your request before I generate SQL.",
+            "reason": "Clarification check returned non-object JSON.",
+            "parse_error": "response was not a JSON object",
+        }
+
+    if data.get("needs_clarification") and not str(data.get("follow_up_question", "")).strip():
+        data["follow_up_question"] = "Please clarify your request before I generate SQL."
+
+    return data
+
+def log_clarification_check(
+    *,
+    check_name: str,
+    state: AgentState,
+    checked_artifact_name: str,
+    checked_artifact: Any,
+    raw_response: str,
+    parsed_response: dict[str, Any],
+) -> None:
+    logger.info(
+        (
+            "HITL check %s | question=%r | artifact_name=%s | "
+            "needs_clarification=%s | follow_up_question=%r | reason=%r | "
+            "checked_artifact=%s | raw_response=%s"
+        ),
+        check_name,
+        state.get("question", ""),
+        checked_artifact_name,
+        bool(parsed_response.get("needs_clarification", False)),
+        str(parsed_response.get("follow_up_question", "")),
+        str(parsed_response.get("reason", "")),
+        truncate_for_log(checked_artifact),
+        truncate_for_log(raw_response),
+    )
 
 def sql_dialect_for_prompt(state: AgentState) -> str:
     return display_sql_dialect(state.get("sql_dialect", "sqlite"))
@@ -149,24 +269,27 @@ def get_schema_node(state: AgentState) -> AgentState:
 
 def check_schema_clarification_node(state: AgentState) -> AgentState:
     llm = build_llm()
+    extracted_schema = state.get("extracted_schema", "")
 
     prompt = thinking_prompts.CHECK_SCHEMA_CLARIFICATION_PROMPT.format(
         question=state["question"],
         sql_dialect=sql_dialect_for_prompt(state),
-        extracted_schema=state.get("extracted_schema", ""),
+        extracted_schema=extracted_schema,
         thinking_clarification_answer=build_clarification_block(state),
     )
 
     response = llm.invoke(prompt)
     content = response.content if isinstance(response.content, str) else str(response.content)
+    data = parse_clarification_response(content, "check_schema_clarification")
 
-    try:
-        data = json.loads(content)
-    except Exception:
-        data = {
-            "needs_clarification": False,
-            "follow_up_question": "",
-        }
+    log_clarification_check(
+        check_name="check_schema_clarification",
+        state=state,
+        checked_artifact_name="extracted_schema",
+        checked_artifact=extracted_schema,
+        raw_response=content,
+        parsed_response=data,
+    )
 
     return {
         "thinking_needs_clarification": bool(data.get("needs_clarification", False)),
@@ -191,25 +314,28 @@ def get_tables_columns_node(state: AgentState) -> AgentState:
 
 def check_tables_columns_clarification_node(state: AgentState) -> AgentState:
     llm = build_llm()
+    tables_columns = state.get("tables_columns", {})
 
     prompt = thinking_prompts.CHECK_TABLES_COLUMNS_CLARIFICATION_PROMPT.format(
         question=state["question"],
         sql_dialect=sql_dialect_for_prompt(state),
         extracted_schema=state.get("extracted_schema", ""),
-        tables_columns=format_artifact(state.get("tables_columns", {})),
+        tables_columns=format_artifact(tables_columns),
         thinking_clarification_answer=build_clarification_block(state),
     )
 
     response = llm.invoke(prompt)
     content = response.content if isinstance(response.content, str) else str(response.content)
+    data = parse_clarification_response(content, "check_tables_columns_clarification")
 
-    try:
-        data = json.loads(content)
-    except Exception:
-        data = {
-            "needs_clarification": False,
-            "follow_up_question": "",
-        }
+    log_clarification_check(
+        check_name="check_tables_columns_clarification",
+        state=state,
+        checked_artifact_name="tables_columns",
+        checked_artifact=tables_columns,
+        raw_response=content,
+        parsed_response=data,
+    )
 
     return {
         "thinking_needs_clarification": bool(data.get("needs_clarification", False)),
@@ -235,25 +361,28 @@ def get_where_conditions_node(state: AgentState) -> AgentState:
 
 def check_where_conditions_clarification_node(state: AgentState) -> AgentState:
     llm = build_llm()
+    where_conditions = state.get("where_conditions", {})
 
     prompt = thinking_prompts.CHECK_WHERE_CONDITIONS_CLARIFICATION_PROMPT.format(
         question=state["question"],
         sql_dialect=sql_dialect_for_prompt(state),
         tables_columns=format_artifact(state.get("tables_columns", {})),
-        where_conditions=format_artifact(state.get("where_conditions", {})),
+        where_conditions=format_artifact(where_conditions),
         thinking_clarification_answer=build_clarification_block(state),
     )
 
     response = llm.invoke(prompt)
     content = response.content if isinstance(response.content, str) else str(response.content)
+    data = parse_clarification_response(content, "check_where_conditions_clarification")
 
-    try:
-        data = json.loads(content)
-    except Exception:
-        data = {
-            "needs_clarification": False,
-            "follow_up_question": "",
-        }
+    log_clarification_check(
+        check_name="check_where_conditions_clarification",
+        state=state,
+        checked_artifact_name="where_conditions",
+        checked_artifact=where_conditions,
+        raw_response=content,
+        parsed_response=data,
+    )
 
     return {
         "thinking_needs_clarification": bool(data.get("needs_clarification", False)),
@@ -280,26 +409,29 @@ def get_limit_aggregation_node(state: AgentState) -> AgentState:
 
 def check_limit_aggregation_clarification_node(state: AgentState) -> AgentState:
     llm = build_llm()
+    limit_aggregation = state.get("limit_aggregation", {})
 
     prompt = thinking_prompts.CHECK_LIMIT_AGGREGATION_CLARIFICATION_PROMPT.format(
         question=state["question"],
         sql_dialect=sql_dialect_for_prompt(state),
         tables_columns=format_artifact(state.get("tables_columns", {})),
         where_conditions=format_artifact(state.get("where_conditions", {})),
-        limit_aggregation=format_artifact(state.get("limit_aggregation", {})),
+        limit_aggregation=format_artifact(limit_aggregation),
         thinking_clarification_answer=build_clarification_block(state),
     )
 
     response = llm.invoke(prompt)
     content = response.content if isinstance(response.content, str) else str(response.content)
+    data = parse_clarification_response(content, "check_limit_aggregation_clarification")
 
-    try:
-        data = json.loads(content)
-    except Exception:
-        data = {
-            "needs_clarification": False,
-            "follow_up_question": "",
-        }
+    log_clarification_check(
+        check_name="check_limit_aggregation_clarification",
+        state=state,
+        checked_artifact_name="limit_aggregation",
+        checked_artifact=limit_aggregation,
+        raw_response=content,
+        parsed_response=data,
+    )
 
     return {
         "thinking_needs_clarification": bool(data.get("needs_clarification", False)),
@@ -333,25 +465,28 @@ def create_query_node(state: AgentState) -> AgentState:
 
 def check_query_clarification_node(state: AgentState) -> AgentState:
     llm = build_llm()
+    generated_query = state.get("generated_query", "")
 
     prompt = thinking_prompts.CHECK_QUERY_CLARIFICATION_PROMPT.format(
         question=state["question"],
         sql_dialect=sql_dialect_for_prompt(state),
-        generated_query=state.get("generated_query", ""),
+        generated_query=generated_query,
         extracted_schema=state.get("extracted_schema", ""),
         thinking_clarification_answer=build_clarification_block(state),
     )
 
     response = llm.invoke(prompt)
     content = response.content if isinstance(response.content, str) else str(response.content)
+    data = parse_clarification_response(content, "check_query_clarification")
 
-    try:
-        data = json.loads(content)
-    except Exception:
-        data = {
-            "needs_clarification": False,
-            "follow_up_question": "",
-        }
+    log_clarification_check(
+        check_name="check_query_clarification",
+        state=state,
+        checked_artifact_name="generated_query",
+        checked_artifact=generated_query,
+        raw_response=content,
+        parsed_response=data,
+    )
 
     return {
         "thinking_needs_clarification": bool(data.get("needs_clarification", False)),

@@ -79,10 +79,8 @@ def build_output_name(
     data_output_path: str,
     mode: str,
     engine: str,
-    chain_of_thought: str,
     sql_dialect: str = "PostgreSQL",
 ) -> str:
-    cot_part = "_cot" if chain_of_thought == "True" else ""
     dialect_part = sql_dialect.replace("/", "_").replace(":", "_")
     return (
         data_output_path
@@ -90,7 +88,6 @@ def build_output_name(
         + mode
         + "_"
         + engine.replace("/", "_").replace(":", "_")
-        + cot_part
         + f"_{dialect_part}.json"
     )
 

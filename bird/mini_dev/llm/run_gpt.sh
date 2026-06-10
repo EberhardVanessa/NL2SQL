@@ -20,8 +20,6 @@ else
   echo "Unknown dataset: $dataset (expected bird or spider)"
   exit 1
 fi
-cot='False'
-
 YOUR_API_KEY='ollama'
 engine='Qwen2.5-Coder-7B-Instruct'
 num_threads=1
@@ -58,7 +56,7 @@ export PGPASSWORD='birdpass'
 # Optional but recommended for syntax validation before execution:
 # pip install sqlglot psycopg2-binary openai requests tqdm
 
-echo "generate $engine batch for $dataset, run in $num_threads threads, with knowledge: $use_knowledge, with chain of thought: $cot, max_fix_attempts: $max_fix_attempts, langgraph_max_fix_attempts: $langgraph_max_fix_attempts"
+echo "generate $engine batch for $dataset, run in $num_threads threads, with knowledge: $use_knowledge, max_fix_attempts: $max_fix_attempts, langgraph_max_fix_attempts: $langgraph_max_fix_attempts"
 
 py -u ./src/gpt_request.py \
   --dataset "${dataset}" \
@@ -70,7 +68,6 @@ py -u ./src/gpt_request.py \
   --eval_path "${eval_path}" \
   --data_output_path "${data_output_path}" \
   --use_knowledge "${use_knowledge}" \
-  --chain_of_thought "${cot}" \
   --num_processes "${num_threads}" \
   --difficulty "${difficulty}" \
   --max_fix_attempts "${max_fix_attempts}" \

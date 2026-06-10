@@ -653,7 +653,6 @@ def parse_args() -> argparse.Namespace:
     args_parser.add_argument("--api_key", type=str, required=True)
     args_parser.add_argument("--engine", type=str, required=True)
     args_parser.add_argument("--data_output_path", type=str)
-    args_parser.add_argument("--chain_of_thought", type=str)
     args_parser.add_argument("--num_processes", type=int, default=3)
     args_parser.add_argument("--max_fix_attempts", type=int, default=2)
     args_parser.add_argument("--langgraph_max_fix_attempts", type=int, default=2)
@@ -698,7 +697,6 @@ def main() -> None:
         data_output_path=args.data_output_path,
         mode=args.mode,
         engine=args.engine,
-        chain_of_thought=args.chain_of_thought,
         sql_dialect=sql_dialect,
     )
     generate_sql_file(sql_lst=responses, output_path=output_name)
@@ -714,14 +712,13 @@ def main() -> None:
     )
 
     print(
-        "successfully collect results from {} for {} evaluation; SQL dialect {}; LLM provider {} Difficulty: {}; Use knowledge: {}; Use COT: {}; Max fix attempts: {}; Schema link mode: {}; Schema link combine: {}; Schema link only: {}; Linker eval rows: {}".format(
+        "successfully collect results from {} for {} evaluation; SQL dialect {}; LLM provider {} Difficulty: {}; Use knowledge: {}; Max fix attempts: {}; Schema link mode: {}; Schema link combine: {}; Schema link only: {}; Linker eval rows: {}".format(
             args.engine,
             args.mode,
             sql_dialect,
             llm_config.provider,
             args.difficulty,
             args.use_knowledge,
-            args.chain_of_thought,
             options.max_fix_attempts,
             options.schema_linking.mode,
             options.schema_linking.combine_strategy,

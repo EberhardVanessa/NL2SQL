@@ -24,6 +24,8 @@ Large datasets are often stored in relational databases, but querying them requi
 |   +-- main.py                FastAPI entrypoint
 +-- bird/                      Local copy of BIRD benchmark data and evaluation assets
 |   +-- mini_dev/              BIRD Mini-Dev data, evaluation, and experiment files
+|   |   +-- llm/               LLM evaluation pipeline and generated experiment JSON files
+|   |   +-- evaluation/        Python evaluator for generated JSON files
 |   +-- postgresql/            PostgreSQL-related BIRD setup/assets
 +-- spider/                    Local copy of Spider benchmark data and evaluation assets
 |   +-- spider_data/           Spider JSON files, SQL gold files, and databases
@@ -46,6 +48,13 @@ The benchmark data in this repository is copied from the original datasets:
 - Spider data in `spider/`: copied from the original Spider text-to-SQL dataset. Original dataset page: https://yale-lily.github.io/spider. Original dataset repository: https://github.com/taoyds/spider.
 
 Use the original dataset pages for license, citation, and redistribution requirements.
+
+## Evaluation Pipeline
+
+The BIRD Mini-Dev evaluation workflow is split between two folders:
+
+- `bird/mini_dev/llm/`: contains the LLM evaluation pipeline code and experiment outputs. The scripts under `src/` generate prediction/debug JSON files, and generated results are stored under `exp_result/`. 
+- `bird/mini_dev/evaluation/`: contains the Python evaluation script for generated JSON files. The main file is `eval_json.py`, which reads the generated JSON output, executes the predicted and gold SQL, and compares the results.
 
 ## Prerequisites
 

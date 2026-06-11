@@ -11,6 +11,7 @@ Main uses:
 - Generate SQL predictions for BIRD or Spider.
 - Run schema linking before SQL generation.
 - Run schema-linking only mode and write linker-evaluation JSONL output.
+- Run error correction mechanism
 
 Important settings near the top of the script:
 
